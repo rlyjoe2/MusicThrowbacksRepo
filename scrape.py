@@ -21,10 +21,8 @@ def parse_page(html:str, year:int):
     
     songs = soup.find_all('div', class_='o-chart-results-list-row-container')
 
-    # HINT: print reviews to see what http tag to extract
     for song in songs:
        song_name = str(song.find('h3', id='title-of-a-story').text.strip())
-       #song_position = int(song.find("span", itemprop = "c-label  a-font-primary-bold-l u-font-size-32@tablet u-letter-spacing-0080@tablet"['content']))
        song_position = song.find("span", class_= "c-label a-font-primary-bold-l u-font-size-32@tablet u-letter-spacing-0080@tablet").getText().strip()
        song_artist = song.find(class_= lambda x: x and x.startswith('c-label a-font-primary-s lrv-u-font-size-14@mobile-max u-line-height-normal@mobile-max u-letter-spacing-0021 lrv-u-display-block')).getText(strip = True)
 
@@ -33,10 +31,7 @@ def parse_page(html:str, year:int):
     return songList
 
 def main():
-    #years = list(range(2006, 2023, 1))
-    # ok for some reason the billboard website is just broken LOL.
-    # years 2008 and 2015 is missing, error 404 or something
-    years = [2006,2007,2009,2010,2011,2012,2013,2014,2016,2017,2018,2019,2020,2021,2022]
+    years = list(range(2006, 2023, 1))
     
 
 
@@ -46,15 +41,25 @@ def main():
     data = []
 
     for link, year in zip(links, years):
+        print("Doing year: ", year)
         html = html_fetcher(link)
-        data.append(parse_page(html, year))
-        sleep(5)
-        
+        data.extend(parse_page(html, year))
+        sleep(3)
+        print("Finished: ", year)
+    
+    
+    header = ['author', 'name', 'rank', 'date']
+    for row in data:
+        print(row, end = "\n")
+
     #Remove these strings if you want the data to be exported yourself.
-    """with open("exported_data.csv", 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(data)
-    """
+    with open("exported_dataV2.csv", 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=header)
+        writer.writeheader()
+        for song in data:
+            print(song)
+            writer.writerow(song)
+    
     pass
 
 if __name__ == "__main__":
